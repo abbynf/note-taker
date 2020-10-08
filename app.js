@@ -4,16 +4,9 @@ const path = require('path');
 var app = express();
 var PORT = process.env.PORT || 8080;
 
-var notes = {
-    "John": "doe",
-    "Harry": "Potter"
-}
-
 app.listen(PORT, function () {
     console.log("App listening on PORT " + PORT);
 });
-
-
 
 app.get("/notes", function (req, res) {
     res.sendFile(path.join(__dirname, "./public/notes.html"))
@@ -21,10 +14,14 @@ app.get("/notes", function (req, res) {
 
 var notesData = require("./db/db.json");
 
+console.log(notesData.length)
+
 app.get("/api/notes", function(req, res) {
     return res.json(notesData);
   });
 
+
+//   Keep this after all other routes
   app.get("*", function (req, res) {
     res.sendFile(path.join(__dirname, "./public/index.html"))
 })

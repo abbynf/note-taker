@@ -37,7 +37,6 @@ app.post("/api/notes", function(req, res) {
     "text" : req.body.text,
     "id" : newId(req.body)
   }
-  var strNote = JSON.stringify(newSavedNote)
   fs.readFile('./db/db.json', 'utf8', function (err, data){
     if (err){
         console.log(err);
@@ -57,6 +56,23 @@ app.post("/api/notes", function(req, res) {
 //   Keep this after all other routes
   app.get("*", function (req, res) {
     res.sendFile(path.join(__dirname, "./public/index.html"))
+})
+
+app.delete("/api/notes/:id", function (req, res) {
+  var chosenid = req.params.id;
+  for (i = 0; i < db.length; i++){
+    if (chosenid === db[i].id){
+      var newdb = db.splice(i, 1);
+    }
+  }
+  // writes the db file with the edited array
+  fs.writeFile("./db/db.json", JSON.stringify(newdb), function(err){
+    if (err) {
+      return console.log(err)
+    }
+  })
+  console.log(db);
+  res.send(true)
 })
 
 app.use(express.static(path.join(__dirname, 'public')));

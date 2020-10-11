@@ -1,12 +1,7 @@
 [
     {
-        "id": "AA",
-        "title": "Test Title",
-        "text": "Test text"
-    },
-    {
-        "id": "BB",
-        "title": "title title",
-        "text": "text text"
+        "title" : "Welcome!",
+        "text" : "Welcome to the note-taker. View past notes by clicking on their title in the panel on the left-hand side. To create a new note, click the pencil icon above. To save the note, click the save icon above. To delete past notes, click the red trash can icon next to the title on the left-hand side of the screen.",
+        "id" : "Welcome"
     }
 ]

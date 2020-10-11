@@ -1,10 +1,20 @@
 var express = require("express");
 const path = require('path');
+var moment = require('moment');
 
 var app = express();
 var PORT = process.env.PORT || 8080;
 
-var db = require("./db/db.json");
+function requireUncached(module){
+  delete require.cache[require.resolve(module)];
+  return require(module);
+}
+
+// delete the cached module
+function db(){
+  const dbFile = requireUncached("./db/db.json");
+  return dbFile;
+  };
 
 var fs = require("fs");
 
@@ -14,34 +24,38 @@ app.use(express.json());
 app.use( express.static(__dirname + '/public' ) );
 
 app.get("/notes", function (req, res) {
-    res.sendFile(path.join(__dirname, "./public/notes.html"))
+  res.sendFile(path.join(__dirname, "./public/notes.html"))
 })
 
-var notesData = require("./db/db.json");
-
 app.get("/api/notes", function(req, res) {
-    return res.json(notesData);
-  });
+  // the problem is that this function isn't reading the updated json file. 
+  res.json(db());
+});
 
 app.get("/", function (req, res) {
     res.sendFile(path.join(__dirname, "./public/index.html"))
 })
 
-function newId(note){
-  return note.title;
+function newId(){
+  return moment().format('MMDDYYYYhhmmssa');
 }
 
 app.post("/api/notes", function(req, res) {
+  var obj;
+  var json;
+  var id = newId();
+  console.log(id);
   var newSavedNote = {
     "title" : req.body.title,
     "text" : req.body.text,
-    "id" : newId(req.body)
+    "id" : id
   }
   fs.readFile('./db/db.json', 'utf8', function (err, data){
     if (err){
         console.log(err);
     } else {
     obj = JSON.parse(data); //now it an object
+
     obj.push(newSavedNote); //add some data
     json = JSON.stringify(obj); //convert it back to json
     fs.writeFile('./db/db.json', json, 'utf8', function (err){
@@ -59,19 +73,36 @@ app.post("/api/notes", function(req, res) {
 })
 
 app.delete("/api/notes/:id", function (req, res) {
+  newdb = [];
+  console.log("entered delte")
   var chosenid = req.params.id;
-  for (i = 0; i < db.length; i++){
-    if (chosenid === db[i].id){
-      var newdb = db.splice(i, 1);
+  for (i = 0; i < db().length; i++){
+    if (chosenid === db()[i].id){
+      console.log("this one matches" + JSON.stringify(db()[i]))
+      console.log("this is what db looks like before splicing" + JSON.stringify(db()));
+      // console.log("this is what it looks like after" + JSON.stringify(db().splice(i, 1)));
+      // var newdb = db().splice(i, 1);
+      // var newdb = db();
+      // console.log("this is the new db" + JSON.stringify(newdb));
+      // fs.writeFile("./db/db.json", JSON.stringify(newdb), function(err) {
+      //   if (err) {
+      //     console.log(err)
+      //   }
+      // })
     }
+    else {
+      newdb.push(db()[i]);
+      console.log("this is the new array" + JSON.stringify(newdb));
+    }
+
   }
   // writes the db file with the edited array
+  console.log("this is the final new array" + JSON.stringify(newdb));
   fs.writeFile("./db/db.json", JSON.stringify(newdb), function(err){
     if (err) {
-      return console.log(err)
+    return console.log(err)
     }
   })
-  console.log(db);
   res.send(true)
 })
 
